@@ -66,7 +66,9 @@ jobs:
         run: xrobot_add_mod ${{ env.XR_MODULE_NAME }} && cat User/xrobot.yaml
 
       - name: Generate main
-        run: xrobot_setup
+        run: |
+          mkdir -p User
+          xrobot_gen_main -c User/xrobot.yaml -o User/xrobot_main.hpp
 
       - name: Build
         run: |
