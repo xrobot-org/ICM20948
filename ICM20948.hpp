@@ -343,10 +343,11 @@ class ICM20948 : public LibXR::Application {
     std::array<float, 3> accl_raw;
     std::array<float, 3> gyro_raw;
 
+    // ICM-20948 burst layout from ACCEL_XOUT_H is accel XYZ, gyro XYZ, then temperature.
     for (int i = 0; i < 3; i++) {
       accl_raw_i16[i] = static_cast<int16_t>(buffer_[i * 2] << 8 | buffer_[i * 2 + 1]);
       accl_raw[i] = static_cast<float>(accl_raw_i16[i]) * GetAcclLSB();
-      gyro_raw_i16[i] = static_cast<int16_t>(buffer_[i * 2 + 8] << 8 | buffer_[i * 2 + 9]);
+      gyro_raw_i16[i] = static_cast<int16_t>(buffer_[i * 2 + 6] << 8 | buffer_[i * 2 + 7]);
       gyro_raw[i] = static_cast<float>(gyro_raw_i16[i]) * GetGyroLSB();
     }
 
@@ -357,7 +358,7 @@ class ICM20948 : public LibXR::Application {
       cali_counter_++;
     }
 
-    int16_t temp_raw = static_cast<int16_t>(buffer_[6] << 8 | buffer_[7]);
+    int16_t temp_raw = static_cast<int16_t>(buffer_[12] << 8 | buffer_[13]);
     temperature_ = static_cast<float>(temp_raw) / 333.87f + 21.0f;
 
     accl_data_ = rotation_ * Eigen::Matrix<float, 3, 1>(
