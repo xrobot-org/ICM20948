@@ -53,27 +53,39 @@ class ICM20948
     RANGE_16G = 3,
   };
 
-  ICM20948(LibXR::GPIO& external_cs_pin_name, LibXR::GPIO& external_int_pin_name,
-           LibXR::SPI& external_spi_name, LibXR::Database& external_database,
-           LibXR::RamFS& external_ramfs, DataRate data_rate, AcclRange accl_range,
-           GyroRange gyro_range, LibXR::Quaternion<float>&& rotation,
-           const char* gyro_topic_name, const char* accl_topic_name,
-           size_t task_stack_depth)
-      : data_rate_(data_rate),
-        accl_range_(accl_range),
-        gyro_range_(gyro_range),
-        topic_gyro_(LibXR::Topic::CreateTopic<decltype(gyro_data_)>(gyro_topic_name)),
-        topic_accl_(LibXR::Topic::CreateTopic<decltype(accl_data_)>(accl_topic_name)),
-        cs_(std::addressof(external_cs_pin_name)),
-        int_(std::addressof(external_int_pin_name)),
-        spi_(std::addressof(external_spi_name)),
-        rotation_(std::move(rotation)),
+  struct Param
+  {
+    DataRate data_rate;
+    AcclRange accl_range;
+    GyroRange gyro_range;
+    LibXR::Quaternion<float> rotation;
+    const char* gyro_topic_name;
+    const char* accl_topic_name;
+    size_t task_stack_depth;
+  };
+
+  ICM20948(
+      LibXR::GPIO& cs_pin,
+      LibXR::GPIO& int_pin,
+      LibXR::SPI& spi,
+      LibXR::Database& database,
+      LibXR::RamFS& ramfs,
+      const Param& param = {.data_rate = ICM20948::DataRate::DATA_RATE_1KHZ, .accl_range = ICM20948::AcclRange::RANGE_16G, .gyro_range = ICM20948::GyroRange::DPS_2000, .rotation = {1.0f, 0.0f, 0.0f, 0.0f}, .gyro_topic_name = "icm20948_gyro", .accl_topic_name = "icm20948_accl", .task_stack_depth = 2048})
+      : data_rate_(param.data_rate),
+        accl_range_(param.accl_range),
+        gyro_range_(param.gyro_range),
+        topic_gyro_(LibXR::Topic::CreateTopic<decltype(gyro_data_)>(param.gyro_topic_name)),
+        topic_accl_(LibXR::Topic::CreateTopic<decltype(accl_data_)>(param.accl_topic_name)),
+        cs_(std::addressof(cs_pin)),
+        int_(std::addressof(int_pin)),
+        spi_(std::addressof(spi)),
+        rotation_(std::move(param.rotation)),
         op_spi_(sem_spi_),
         cmd_file_(LibXR::RamFS::CreateFile("icm20948", CommandFunc, this)),
-        gyro_data_key_(external_database, "icm20948_gyro_data",
+        gyro_data_key_(database, "icm20948_gyro_data",
                        Eigen::Matrix<float, 3, 1>(0.0f, 0.0f, 0.0f))
   {
-    external_ramfs.bin_.Add(cmd_file_);
+    ramfs.bin_.Add(cmd_file_);
 
     cs_->Write(true);
     int_->DisableInterrupt();
@@ -91,7 +103,7 @@ class ICM20948
     }
     XR_LOG_PASS("ICM20948: Init success, who_am_i=0x%02X.", who_am_i_);
 
-    thread_.Create(this, ThreadFunc, "icm20948_thread", task_stack_depth,
+    thread_.Create(this, ThreadFunc, "icm20948_thread", param.task_stack_depth,
                    LibXR::Thread::Priority::REALTIME);
   }
 
