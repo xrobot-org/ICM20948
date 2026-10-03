@@ -22,48 +22,104 @@ depends: []
 #include "thread.hpp"
 #include "transform.hpp"
 
+/**
+ * @brief ICM-20648 / ICM-20948 6 轴 IMU 驱动模块，采样加速度与角速度并发布到 Topic。
+ *        Driver Module for the ICM-20648 / ICM-20948 6-axis IMU; it samples the
+ *        acceleration and angular velocity and publishes them to Topics.
+ */
 class ICM20948
 {
  public:
+  /// 角度到弧度的换算系数 (rad/deg)
+  /// Degree-to-radian factor (rad/deg)
   static constexpr float M_DEG2RAD_MULT = 0.01745329251f;
+  /// 标准重力加速度 (m/s^2)
+  /// Standard gravity (m/s^2)
   static constexpr float STANDARD_GRAVITY = 9.80665f;
 
+  /**
+   * @brief 采样率设置；枚举值减 1 写入采样率分频寄存器。
+   *        Sample-rate setting; the enum value minus 1 is written to the sample-rate
+   *        divider registers.
+   */
   enum class DataRate : uint8_t
   {
-    DATA_RATE_4KHZ = 1,
-    DATA_RATE_1KHZ = 4,
-    DATA_RATE_500HZ = 8,
-    DATA_RATE_250HZ = 16,
-    DATA_RATE_125HZ = 32,
+    DATA_RATE_4KHZ = 1,    ///< 分频值 0
+                           ///< Divider 0
+    DATA_RATE_1KHZ = 4,    ///< 分频值 3
+                           ///< Divider 3
+    DATA_RATE_500HZ = 8,   ///< 分频值 7
+                           ///< Divider 7
+    DATA_RATE_250HZ = 16,  ///< 分频值 15
+                           ///< Divider 15
+    DATA_RATE_125HZ = 32,  ///< 分频值 31
+                           ///< Divider 31
   };
 
+  /**
+   * @brief 陀螺仪量程。
+   *        Gyroscope range.
+   */
   enum class GyroRange : uint8_t
   {
-    DPS_250 = 0,
-    DPS_500 = 1,
-    DPS_1000 = 2,
-    DPS_2000 = 3,
+    DPS_250 = 0,   ///< ±250 dps
+    DPS_500 = 1,   ///< ±500 dps
+    DPS_1000 = 2,  ///< ±1000 dps
+    DPS_2000 = 3,  ///< ±2000 dps
   };
 
+  /**
+   * @brief 加速度计量程。
+   *        Accelerometer range.
+   */
   enum class AcclRange : uint8_t
   {
-    RANGE_2G = 0,
-    RANGE_4G = 1,
-    RANGE_8G = 2,
-    RANGE_16G = 3,
+    RANGE_2G = 0,   ///< ±2 g
+    RANGE_4G = 1,   ///< ±4 g
+    RANGE_8G = 2,   ///< ±8 g
+    RANGE_16G = 3,  ///< ±16 g
   };
 
+  /**
+   * @brief ICM20948 配置参数。
+   *        ICM20948 configuration parameters.
+   */
   struct Param
   {
-    DataRate data_rate;
-    AcclRange accl_range;
-    GyroRange gyro_range;
-    LibXR::Quaternion<float> rotation;
-    const char* gyro_topic_name;
-    const char* accl_topic_name;
-    size_t task_stack_depth;
+    DataRate data_rate;  ///< 采样率设置
+    ///< Sample-rate setting
+    AcclRange accl_range;  ///< 加速度计量程
+    ///< Accelerometer range
+    GyroRange gyro_range;  ///< 陀螺仪量程
+    ///< Gyroscope range
+    LibXR::Quaternion<float> rotation;  ///< 传感器到应用坐标系的四元数 (w, x, y, z)
+    ///< Quaternion (w, x, y, z), sensor to application frame
+    const char* gyro_topic_name;  ///< 陀螺仪 Topic 名称
+    ///< Gyroscope Topic name
+    const char* accl_topic_name;  ///< 加速度计 Topic 名称
+    ///< Accelerometer Topic name
+    size_t task_stack_depth;  ///< 采样线程栈深
+    ///< Sampling thread stack depth
   };
 
+  /**
+   * @brief 构造 ICM20948：配置中断与 RamFS 命令，初始化芯片，创建采样线程。
+   *        Construct ICM20948: configure the interrupt and the RamFS command, initialize
+   *        the chip, and create the sampling thread.
+   *
+   * @param cs_pin 片选 GPIO。
+   *               Chip-select GPIO.
+   * @param int_pin 数据就绪中断 GPIO。
+   *                Data-ready interrupt GPIO.
+   * @param spi 连接 IMU 的 SPI。
+   *            SPI connected to the IMU.
+   * @param database 保存陀螺仪零偏的 Database。
+   *                 Database that stores the gyroscope zero offset.
+   * @param ramfs 接收 `bin/icm20948` 命令的 RamFS。
+   *              RamFS that receives the `bin/icm20948` command.
+   * @param param 配置参数。
+   *              Configuration parameters.
+   */
   ICM20948(
       LibXR::GPIO& cs_pin,
       LibXR::GPIO& int_pin,
@@ -107,6 +163,10 @@ class ICM20948
                    LibXR::Thread::Priority::REALTIME);
   }
 
+  /**
+   * @brief 监控回调：数据含 NaN 或 Inf 时输出警告。
+   *        Monitor callback: log a warning when the data contains NaN or Inf.
+   */
   void OnMonitor()
   {
     if (std::isinf(gyro_data_.x()) || std::isinf(gyro_data_.y()) ||
