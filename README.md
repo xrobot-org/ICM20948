@@ -44,7 +44,7 @@ ICM20948(LibXR::GPIO& cs_pin,
          LibXR::SPI& spi,
          LibXR::Database& database,
          LibXR::RamFS& ramfs,
-         const Param& param = {.data_rate = ICM20948::DataRate::DATA_RATE_1KHZ,
+         const Param& param = {.data_rate = ICM20948::DataRate::DATA_RATE_281HZ,
                                .accl_range = ICM20948::AcclRange::RANGE_16G,
                                .gyro_range = ICM20948::GyroRange::DPS_2000,
                                .rotation = {1.0f, 0.0f, 0.0f, 0.0f},
@@ -63,7 +63,7 @@ ICM20948(LibXR::GPIO& cs_pin,
 
 配置参数（`Param`）：
 
-- `data_rate`：采样率设置，默认 `DATA_RATE_1KHZ`。枚举值减 1 写入陀螺仪与加速度计的采样率分频寄存器（`DATA_RATE_4KHZ` 为 0，`DATA_RATE_1KHZ` 为 3，`DATA_RATE_500HZ` 为 7，`DATA_RATE_250HZ` 为 15，`DATA_RATE_125HZ` 为 31）。数字低通滤波开启时，输出速率为 1.125 kHz / (1 + 分频值)。
+- `data_rate`：采样率设置，默认 `DATA_RATE_281HZ`。枚举值减 1 写入陀螺仪与加速度计的采样率分频寄存器（`DATA_RATE_1125HZ` 为 0，`DATA_RATE_281HZ` 为 3，`DATA_RATE_141HZ` 为 7，`DATA_RATE_70HZ` 为 15，`DATA_RATE_35HZ` 为 31）。数字低通滤波开启时，输出速率为 1.125 kHz / (1 + 分频值)，枚举名中的频率为该速率取整。
 - `accl_range`：加速度计量程，默认 `RANGE_16G`；可选 `RANGE_2G`、`RANGE_4G`、`RANGE_8G`、`RANGE_16G`。
 - `gyro_range`：陀螺仪量程，默认 `DPS_2000`；可选 `DPS_250`、`DPS_500`、`DPS_1000`、`DPS_2000`。
 - `rotation`：传感器坐标系到应用坐标系的四元数 `{w, x, y, z}`，默认单位四元数。
@@ -80,7 +80,7 @@ Dependencies:
 
 Configuration parameters (`Param`):
 
-- `data_rate`: sample-rate setting, default `DATA_RATE_1KHZ`. The enum value minus 1 is written to the sample-rate divider registers of the gyroscope and the accelerometer (`DATA_RATE_4KHZ` 0, `DATA_RATE_1KHZ` 3, `DATA_RATE_500HZ` 7, `DATA_RATE_250HZ` 15, `DATA_RATE_125HZ` 31). With the digital low-pass filter enabled, the output rate is 1.125 kHz / (1 + divider).
+- `data_rate`: sample-rate setting, default `DATA_RATE_281HZ`. The enum value minus 1 is written to the sample-rate divider registers of the gyroscope and the accelerometer (`DATA_RATE_1125HZ` 0, `DATA_RATE_281HZ` 3, `DATA_RATE_141HZ` 7, `DATA_RATE_70HZ` 15, `DATA_RATE_35HZ` 31). With the digital low-pass filter enabled, the output rate is 1.125 kHz / (1 + divider); the frequency in each enumerator name is that rate, rounded.
 - `accl_range`: accelerometer range, default `RANGE_16G`; options are `RANGE_2G`, `RANGE_4G`, `RANGE_8G`, `RANGE_16G`.
 - `gyro_range`: gyroscope range, default `DPS_2000`; options are `DPS_250`, `DPS_500`, `DPS_1000`, `DPS_2000`.
 - `rotation`: quaternion `{w, x, y, z}` from the sensor frame to the application frame, default identity.
@@ -116,7 +116,7 @@ modules:
       - database: database
       - ramfs: ramfs
       - param:
-          data_rate: ICM20948::DataRate::DATA_RATE_1KHZ
+          data_rate: ICM20948::DataRate::DATA_RATE_281HZ
           accl_range: ICM20948::AcclRange::RANGE_16G
           gyro_range: ICM20948::GyroRange::DPS_2000
           rotation: '{1.0f, 0.0f, 0.0f, 0.0f}'

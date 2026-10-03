@@ -38,22 +38,24 @@ class ICM20948
   static constexpr float STANDARD_GRAVITY = 9.80665f;
 
   /**
-   * @brief 采样率设置；枚举值减 1 写入采样率分频寄存器。
+   * @brief 采样率设置；枚举值减 1 写入采样率分频寄存器，数字低通滤波开启时输出速率为
+   *        1125 Hz / (1 + 分频值)。
    *        Sample-rate setting; the enum value minus 1 is written to the sample-rate
-   *        divider registers.
+   *        divider registers, and with the digital low-pass filter enabled the output
+   *        rate is 1125 Hz / (1 + divider).
    */
   enum class DataRate : uint8_t
   {
-    DATA_RATE_4KHZ = 1,    ///< 分频值 0
-                           ///< Divider 0
-    DATA_RATE_1KHZ = 4,    ///< 分频值 3
-                           ///< Divider 3
-    DATA_RATE_500HZ = 8,   ///< 分频值 7
-                           ///< Divider 7
-    DATA_RATE_250HZ = 16,  ///< 分频值 15
-                           ///< Divider 15
-    DATA_RATE_125HZ = 32,  ///< 分频值 31
-                           ///< Divider 31
+    DATA_RATE_1125HZ = 1,  ///< 分频值 0，1125 Hz
+                           ///< Divider 0, 1125 Hz
+    DATA_RATE_281HZ = 4,   ///< 分频值 3，281.25 Hz
+                           ///< Divider 3, 281.25 Hz
+    DATA_RATE_141HZ = 8,   ///< 分频值 7，140.625 Hz
+                           ///< Divider 7, 140.625 Hz
+    DATA_RATE_70HZ = 16,   ///< 分频值 15，70.3125 Hz
+                           ///< Divider 15, 70.3125 Hz
+    DATA_RATE_35HZ = 32,   ///< 分频值 31，35.15625 Hz
+                           ///< Divider 31, 35.15625 Hz
   };
 
   /**
@@ -122,7 +124,7 @@ class ICM20948
    */
   ICM20948(LibXR::GPIO& cs_pin, LibXR::GPIO& int_pin, LibXR::SPI& spi,
            LibXR::Database& database, LibXR::RamFS& ramfs,
-           const Param& param = {.data_rate = ICM20948::DataRate::DATA_RATE_1KHZ,
+           const Param& param = {.data_rate = ICM20948::DataRate::DATA_RATE_281HZ,
                                  .accl_range = ICM20948::AcclRange::RANGE_16G,
                                  .gyro_range = ICM20948::GyroRange::DPS_2000,
                                  .rotation = {1.0f, 0.0f, 0.0f, 0.0f},
