@@ -2,7 +2,7 @@
 
 // clang-format off
 /* === MODULE MANIFEST V2 ===
-module_description: TDK ICM-20648/ICM-20948 SPI 6-axis IMU driver
+module_description: TDK ICM-20648 / ICM-20948 6 轴 IMU（SPI）驱动模块 / Driver Module for the TDK ICM-20648 / ICM-20948 6-axis IMU over SPI
 depends: []
 === END MANIFEST === */
 // clang-format on
@@ -291,12 +291,12 @@ class ICM20948
     {
       return false;
     }
-    // The onboard IMU uses the default active-high pulse interrupt path.
+    // Default interrupt pin configuration: active high, pulse.
     if (!WriteRegister(BANK0_INT_PIN_CFG, 0x00))
     {
       return false;
     }
-    // Drain stale data-ready status before enabling the EXTI-driven path.
+    // Clear the stale data-ready status before enabling the interrupt.
     uint8_t status = 0;
     if (!ReadRegister(BANK0_INT_STATUS_1, status))
     {
