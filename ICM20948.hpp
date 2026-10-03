@@ -120,18 +120,22 @@ class ICM20948
    * @param param 配置参数。
    *              Configuration parameters.
    */
-  ICM20948(
-      LibXR::GPIO& cs_pin,
-      LibXR::GPIO& int_pin,
-      LibXR::SPI& spi,
-      LibXR::Database& database,
-      LibXR::RamFS& ramfs,
-      const Param& param = {.data_rate = ICM20948::DataRate::DATA_RATE_1KHZ, .accl_range = ICM20948::AcclRange::RANGE_16G, .gyro_range = ICM20948::GyroRange::DPS_2000, .rotation = {1.0f, 0.0f, 0.0f, 0.0f}, .gyro_topic_name = "icm20948_gyro", .accl_topic_name = "icm20948_accl", .task_stack_depth = 2048})
+  ICM20948(LibXR::GPIO& cs_pin, LibXR::GPIO& int_pin, LibXR::SPI& spi,
+           LibXR::Database& database, LibXR::RamFS& ramfs,
+           const Param& param = {.data_rate = ICM20948::DataRate::DATA_RATE_1KHZ,
+                                 .accl_range = ICM20948::AcclRange::RANGE_16G,
+                                 .gyro_range = ICM20948::GyroRange::DPS_2000,
+                                 .rotation = {1.0f, 0.0f, 0.0f, 0.0f},
+                                 .gyro_topic_name = "icm20948_gyro",
+                                 .accl_topic_name = "icm20948_accl",
+                                 .task_stack_depth = 2048})
       : data_rate_(param.data_rate),
         accl_range_(param.accl_range),
         gyro_range_(param.gyro_range),
-        topic_gyro_(LibXR::Topic::CreateTopic<decltype(gyro_data_)>(param.gyro_topic_name)),
-        topic_accl_(LibXR::Topic::CreateTopic<decltype(accl_data_)>(param.accl_topic_name)),
+        topic_gyro_(
+            LibXR::Topic::CreateTopic<decltype(gyro_data_)>(param.gyro_topic_name)),
+        topic_accl_(
+            LibXR::Topic::CreateTopic<decltype(accl_data_)>(param.accl_topic_name)),
         cs_(std::addressof(cs_pin)),
         int_(std::addressof(int_pin)),
         spi_(std::addressof(spi)),
@@ -145,7 +149,8 @@ class ICM20948
 
     cs_->Write(true);
     int_->DisableInterrupt();
-    int_->SetConfig({LibXR::GPIO::Direction::RISING_INTERRUPT, LibXR::GPIO::Pull::NONE});
+    int_->SetConfig({.direction = LibXR::GPIO::Direction::RISING_INTERRUPT,
+                     .pull = LibXR::GPIO::Pull::NONE});
 
     auto int_cb = LibXR::GPIO::Callback::Create(
         [](bool in_isr, ICM20948* self) { self->new_data_.PostFromCallback(in_isr); },
