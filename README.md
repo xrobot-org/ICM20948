@@ -1,6 +1,6 @@
 # ICM20948
 
-TDK ICM-20648 / ICM-20948 6 轴 IMU（SPI）驱动模块 / Driver Module for the TDK ICM-20648 / ICM-20948 6-axis IMU over SPI
+TDK ICM-20648、ICM-20948 6 轴 IMU（SPI）驱动模块 / Driver Module for the TDK ICM-20648 and ICM-20948 6-axis IMUs over SPI
 
 ## 1. 模块作用 / Purpose
 
@@ -68,7 +68,7 @@ ICM20948(LibXR::GPIO& cs_pin,
 - `gyro_range`：陀螺仪量程，默认 `DPS_2000`；可选 `DPS_250`、`DPS_500`、`DPS_1000`、`DPS_2000`。
 - `rotation`：传感器坐标系到应用坐标系的四元数 `{w, x, y, z}`，默认单位四元数。
 - `gyro_topic_name`、`accl_topic_name`：发布的 Topic 名称，默认 `"icm20948_gyro"`、`"icm20948_accl"`。
-- `task_stack_depth`：采样线程栈深，默认 2048。
+- `task_stack_depth`：采样线程栈深，单位字节，默认 2048。
 
 Dependencies:
 
@@ -85,7 +85,7 @@ Configuration parameters (`Param`):
 - `gyro_range`: gyroscope range, default `DPS_2000`; options are `DPS_250`, `DPS_500`, `DPS_1000`, `DPS_2000`.
 - `rotation`: quaternion `{w, x, y, z}` from the sensor frame to the application frame, default identity.
 - `gyro_topic_name`, `accl_topic_name`: names of the published Topics, default `"icm20948_gyro"` and `"icm20948_accl"`.
-- `task_stack_depth`: stack depth of the sampling thread, default 2048.
+- `task_stack_depth`: stack depth of the sampling thread in bytes, default 2048.
 
 ## 3. Topic
 

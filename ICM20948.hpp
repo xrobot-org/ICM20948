@@ -2,7 +2,7 @@
 
 // clang-format off
 /* === MODULE MANIFEST V2 ===
-module_description: TDK ICM-20648 / ICM-20948 6 轴 IMU（SPI）驱动模块 / Driver Module for the TDK ICM-20648 / ICM-20948 6-axis IMU over SPI
+module_description: TDK ICM-20648、ICM-20948 6 轴 IMU（SPI）驱动模块 / Driver Module for the TDK ICM-20648 and ICM-20948 6-axis IMUs over SPI
 depends: []
 === END MANIFEST === */
 // clang-format on
